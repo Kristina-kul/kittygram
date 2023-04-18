@@ -1,19 +1,21 @@
+from rest_framework.decorators import api_view  # Импортировали декоратор
+from rest_framework.response import Response  # Импортировали класс Response
 from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 
 from .models import Cat
 from .serializers import CatSerializer
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST'])  # Разрешены только POST- и GET-запросы
 def cat_list(request):
+    # В случае POST-запроса добавим список записей в БД
     if request.method == 'POST':
-        serializer = CatSerializer(data=request.data)
+        serializer = CatSerializer(data=request.data, many=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # В случае GET-запроса возвращаем список всех котиков
     cats = Cat.objects.all()
     serializer = CatSerializer(cats, many=True)
-    return Response(serializer.data)
+    return Response(serializer.data) 
